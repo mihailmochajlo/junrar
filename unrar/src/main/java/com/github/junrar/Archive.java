@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 import com.github.junrar.exception.RarException;
 import com.github.junrar.exception.RarException.RarExceptionType;
 import com.github.junrar.impl.FileVolumeManager;
+import com.github.junrar.impl.InputStreamVolumeManager;
 import com.github.junrar.io.IReadOnlyAccess;
 import com.github.junrar.rarfile.AVHeader;
 import com.github.junrar.rarfile.BaseBlock;
@@ -118,6 +119,14 @@ public class Archive implements Closeable {
 		this(new FileVolumeManager(firstVolume), unrarCallback);
 	}
 
+	public Archive(InputStream firstVolume) throws RarException, IOException {
+		this(new InputStreamVolumeManager(firstVolume), null);
+	}
+
+	public Archive(InputStream firstVolume, UnrarCallback unrarCallback)
+			throws RarException, IOException {
+		this(new InputStreamVolumeManager(firstVolume), unrarCallback);
+	}
 	// public File getFile() {
 	// return file;
 	// }
