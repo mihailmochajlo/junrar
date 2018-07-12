@@ -8,7 +8,7 @@ import java.io.InputStream;
 import com.github.junrar.Archive;
 import com.github.junrar.Volume;
 import com.github.junrar.io.IReadOnlyAccess;
-import com.github.junrar.io.ReadOnlyAccessByteArray;
+import com.github.junrar.io.InputStreamReadOnlyAccessFile;
 
 
 /**
@@ -17,7 +17,7 @@ import com.github.junrar.io.ReadOnlyAccessByteArray;
  */
 public class InputStreamVolume implements Volume {
 	private final Archive archive;
-	private final byte[] file;
+	private final InputStream file;
 
 	/**
 	 * @param file
@@ -25,24 +25,18 @@ public class InputStreamVolume implements Volume {
 	 */
 	public InputStreamVolume(Archive archive, InputStream inputstream) throws IOException {
 		this.archive = archive;
-		byte[] buff = new byte[8000];
-		int bytesRead = 0;
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		while((bytesRead = inputstream.read(buff)) != -1) {
-			bao.write(buff, 0, bytesRead);
-		}
-		byte[] data = bao.toByteArray();
-		this.file = data;
+		this.file = inputstream;
 	}
 
 	@Override
 	public IReadOnlyAccess getReadOnlyAccess() throws IOException {
-        return new ReadOnlyAccessByteArray(file);
+        return new InputStreamReadOnlyAccessFile(file);
 	}
 
 	@Override
 	public long getLength() {
-		return file.length;
+		//return file.length;
+                return Long.MAX_VALUE;
 	}
 
 	@Override
