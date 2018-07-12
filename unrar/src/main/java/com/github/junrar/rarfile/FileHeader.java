@@ -160,7 +160,7 @@ public class FileHeader extends BlockHeader {
 		}
 	    } else {
 		fileName = new String(fileNameBytes);
-		fileNameW = "";
+		fileNameW = fileName;
 	    }
 	}
 
