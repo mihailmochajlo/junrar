@@ -188,6 +188,20 @@ public class Archive implements Closeable {
 		}
 		return list;
 	}
+        
+        public FileHeader getFileHeaderFromName(String name)
+        {
+            FileHeader result = null;
+            List<FileHeader> file_headers = getFileHeaders();
+            for (int i = 0; i < file_headers.size() && result == null; i = i + 1)
+            {
+                if (file_headers.get(i).getFileNameW().equals(name))
+                {
+                    result = file_headers.get(i);
+                }
+            }
+            return result;
+        }
 
 	public FileHeader nextFileHeader() {
 		int n = headers.size();
@@ -458,6 +472,16 @@ public class Archive implements Closeable {
 			}
 		}
 	}
+        
+        public void extractFile(String file_name, OutputStream os) throws RarException
+        {
+            FileHeader header = getFileHeaderFromName(file_name);
+            if (header == null)
+            {
+                throw new RarException(RarExceptionType.headerNotInArchive);
+            }
+            extractFile(header, os);
+        }
 
 	/**
 	 * Returns an {@link InputStream} that will allow to read the file and
