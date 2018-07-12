@@ -98,13 +98,14 @@ public final class RandomAccessStream extends InputStream {
 	}
 
 	public final void readFully(byte[] bytes, int len) throws IOException {
-		int read = 0;
-		do {
-			int l = read(bytes, read, len - read);
-			if (l < 0)
-				break;
-			read += l;
-		} while (read < len);
+//		int read = 0;
+//		do {
+//			int l = read(bytes, read, len - read);
+//			if (l < 0)
+//				break;
+//			read += l;
+//		} while (read < len);
+            pointer += src.read(bytes, 0, len);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -144,19 +145,18 @@ public final class RandomAccessStream extends InputStream {
 		if (loc < 0L)
 			pointer = 0L;
 		else
-			pointer = loc;
-	}
-
-	public void seek(int loc) throws IOException {
-		long lloc = ((long) loc) & 0xffffffffL;
-		if (ras != null) {
-			ras.seek(lloc);
-			return;
-		}
-		if (lloc < 0L)
-			pointer = 0L;
-		else
-			pointer = lloc;
+                {
+                    long div = loc - pointer;
+                    long skipped = 0;
+                    
+                    while (div != 0)
+                    {
+                        skipped = src.skip(div);
+                        div = div - skipped;
+                    }
+                    pointer = loc;
+                }
+                    
 	}
 
 	public final int readInt() throws IOException {
