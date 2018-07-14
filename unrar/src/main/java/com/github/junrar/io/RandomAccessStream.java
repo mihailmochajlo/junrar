@@ -158,6 +158,18 @@ public final class RandomAccessStream extends InputStream {
                 }
                     
 	}
+        
+        public void guaranteedSkip(long num) throws IOException {
+            long div = num;
+            long skipped = 0;
+                    
+            while (div != 0)
+            {
+                skipped = src.skip(div);
+                div = div - skipped;
+            }
+            pointer += num;
+        }
 
 	public final int readInt() throws IOException {
 		int i = read();
