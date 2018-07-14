@@ -251,11 +251,6 @@ public class Archive implements Closeable {
 
 			long position = rof.getPosition();
 
-			// Weird, but is trying to read beyond the end of the file
-			if (position >= fileLength) {
-				break;
-			}
-
 			// logger.info("\n--------reading header--------");
 			size = rof.readFully(baseBlockBuffer, BaseBlock.BaseBlockSize);
 			if (size == 0) {
