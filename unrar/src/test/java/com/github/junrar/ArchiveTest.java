@@ -63,14 +63,14 @@ public class ArchiveTest extends TestCase {
             archiveFile = new File(dirName + "\\" + archName);
             fis = new FileInputStream(archiveFile);
             instance = new Archive(fis);
-            List<FileHeader> result = instance.getFileHeaders();
+            List<String> result = instance.readFileHeaders(fis);
             fis.close();
             
             assertEquals(expResult.size(), result.size());
             
             for (int i = 0; i < expResult.size(); i++)
             {
-                assert(expResult.contains(result.get(i).getFileNameW()));
+                assert(expResult.contains(result.get(i)));
             }
         }
         catch(Exception ex)

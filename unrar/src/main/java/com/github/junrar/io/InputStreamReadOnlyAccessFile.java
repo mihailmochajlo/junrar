@@ -51,6 +51,10 @@ public class InputStreamReadOnlyAccessFile implements IReadOnlyAccess {
 		return count;
 	}
 
+        public void skip(long count) throws IOException {
+            is.guaranteedSkip(count);
+        }
+        
 	@Override
 	public void close() throws IOException {
 		is.close();
