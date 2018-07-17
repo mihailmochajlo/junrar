@@ -259,6 +259,8 @@ public class Archive implements Closeable {
 
                     switch (block.getHeaderType())
                     {
+                        case MarkHeader:
+                            break;
                         case MainHeader:
                             toRead = block.hasEncryptVersion() ? MainHeader.mainHeaderSizeWithEnc
                                             : MainHeader.mainHeaderSize;
@@ -302,15 +304,27 @@ public class Archive implements Closeable {
                             rois.readFully(blockHeaderBuffer, BlockHeader.blockHeaderSize);
                             BlockHeader blockHead = new BlockHeader(block,
                                             blockHeaderBuffer);
+                            FileHeader fh = null;
                             switch (blockHead.getHeaderType())
                             {
+                                case NewSubHeader:
+                                    toRead = blockHead.getHeaderSize()
+                                                    - BlockHeader.BaseBlockSize
+                                                    - BlockHeader.blockHeaderSize;
+                                    byte[] subHeaderBuffer = new byte[toRead];
+                                    rois.readFully(subHeaderBuffer, toRead);
+                                    fh = new FileHeader(blockHead, subHeaderBuffer);
+                                    newpos = fh.getPositionInFile() + fh.getHeaderSize()
+                                                    + fh.getFullPackSize();
+                                    rois.setPosition(newpos);
+                                    break;
                                 case FileHeader:
                                     toRead = blockHead.getHeaderSize()
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
                                     byte[] fileHeaderBuffer = new byte[toRead];
                                     rois.readFully(fileHeaderBuffer, toRead);
-                                    FileHeader fh = new FileHeader(blockHead, fileHeaderBuffer);
+                                    fh = new FileHeader(blockHead, fileHeaderBuffer);
                                     fileNames.add(fh.getFileNameW());
                                     newpos = fh.getPositionInFile() + fh.getHeaderSize()
                                                     + fh.getFullPackSize();
