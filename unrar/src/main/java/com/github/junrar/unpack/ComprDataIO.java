@@ -108,7 +108,7 @@ public class ComprDataIO {
 	public void init(FileHeader hd) throws IOException {
 		long startPos = hd.getPositionInFile() + hd.getHeaderSize();
 		unpPackedSize = hd.getFullPackSize();
-		inputStream = new ReadOnlyAccessInputStream(archive.getRof(), startPos,
+		inputStream = new ReadOnlyAccessInputStream(archive.getRois(), startPos,
 				startPos + unpPackedSize);
 		subHead = hd;
 		curUnpRead = 0;
@@ -138,29 +138,29 @@ public class ComprDataIO {
 			unpPackedSize -= retCode;
 			archive.bytesReadRead(retCode);
 			if (unpPackedSize == 0 && subHead.isSplitAfter()) {
-				Volume nextVolume = archive.getVolumeManager().nextArchive(
-						archive, archive.getVolume());
-				if (nextVolume == null) {
-					nextVolumeMissing = true;
-					return -1;
-				}
-
-				FileHeader hd = this.getSubHeader();
-				if (hd.getUnpVersion() >= 20 && hd.getFileCRC() != 0xffffffff
-						&& this.getPackedCRC() != ~hd.getFileCRC()) {
-					throw new RarException(RarExceptionType.crcError);
-				}
-				UnrarCallback callback = archive.getUnrarCallback();
-				if ((callback != null)
-						&& !callback.isNextVolumeReady(nextVolume)) {
-					return -1;
-				}
-				archive.setVolume(nextVolume);
-				hd = archive.nextFileHeader();
-				if (hd == null) {
-					return -1;
-				}
-				this.init(hd);
+//				Volume nextVolume = archive.getVolumeManager().nextArchive(
+//						archive, archive.getVolume());
+//				if (nextVolume == null) {
+//					nextVolumeMissing = true;
+//					return -1;
+//				}
+//
+//				FileHeader hd = this.getSubHeader();
+//				if (hd.getUnpVersion() >= 20 && hd.getFileCRC() != 0xffffffff
+//						&& this.getPackedCRC() != ~hd.getFileCRC()) {
+//					throw new RarException(RarExceptionType.crcError);
+//				}
+//				UnrarCallback callback = archive.getUnrarCallback();
+//				if ((callback != null)
+//						&& !callback.isNextVolumeReady(nextVolume)) {
+//					return -1;
+//				}
+//				archive.setVolume(nextVolume);
+//				hd = archive.nextFileHeader();
+//				if (hd == null) {
+//					return -1;
+//				}
+//				this.init(hd);
 			} else {
 				break;
 			}
