@@ -7,6 +7,7 @@ package com.github.junrar;
 
 import com.github.junrar.rarfile.FileHeader;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
@@ -19,7 +20,8 @@ import junit.framework.TestCase;
  */
 public class ArchiveTest extends TestCase {
 
-    private static final String archName = "test.rar";
+    private static final String archName = "test\\test.rar";
+    private static final String fileName = "test\\cat.jpg";
     
     public ArchiveTest(String testName) {
         super(testName);
@@ -60,5 +62,37 @@ public class ArchiveTest extends TestCase {
         {
             System.out.println(ex.getMessage());
         }
-    }    
+    }
+    
+    public void testExtractFile()
+    {
+        System.out.println("<--- TEST ---> extractFile <--- TEST--->");
+        
+        File archiveFile = null;
+        FileInputStream fis;
+        FileOutputStream fos;
+        Archive instance = null;
+        byte[] expResult;
+        
+        try
+        {
+            File expFile = new File(fileName);
+            expResult = new byte[(int)expFile.length()];
+            FileInputStream expFileStream = new FileInputStream(fileName);
+            expFileStream.read(expResult);
+            expFileStream.close();
+            
+            fis = new FileInputStream(archName);
+            instance = new Archive(fis);
+            fos = new FileOutputStream("test\\extracted.jpg");
+            instance.extractFile(fis, "cat.jpg", fos);
+            fos.flush();
+            fis.close();
+            fos.close();
+        }
+        catch (Exception ex)
+        {
+            System.out.println(ex.getMessage());
+        }
+    }
 }

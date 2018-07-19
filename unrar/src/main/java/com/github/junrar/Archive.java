@@ -203,7 +203,7 @@ public class Archive implements Closeable {
 
         public List<String> readFileHeaders(InputStream is) throws IOException, RarException
         {
-            InputStreamReadOnlyAccessFile rois = new InputStreamReadOnlyAccessFile(is);
+            rois = new InputStreamReadOnlyAccessFile(is);
             List<String> fileNames = new ArrayList<String>();
             int toRead = 0;
 
@@ -362,7 +362,7 @@ public class Archive implements Closeable {
         
         public boolean extractFile(InputStream is, String fileName, OutputStream os) throws IOException, RarException
         {
-            InputStreamReadOnlyAccessFile rois = new InputStreamReadOnlyAccessFile(is);
+            rois = new InputStreamReadOnlyAccessFile(is);
             int toRead = 0;
             boolean result = false;
 
