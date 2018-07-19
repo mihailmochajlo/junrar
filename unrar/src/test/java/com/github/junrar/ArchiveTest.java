@@ -8,6 +8,7 @@ package com.github.junrar;
 import com.github.junrar.rarfile.FileHeader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
@@ -72,9 +73,11 @@ public class ArchiveTest extends TestCase {
         
         File archiveFile = null;
         FileInputStream fis;
-        FileOutputStream fos;
+        ByteArrayOutputStream baos;
         Archive instance = null;
         byte[] expResult;
+        byte[] result;
+        int diffCount = 0;
         
         try
         {
@@ -86,11 +89,25 @@ public class ArchiveTest extends TestCase {
             
             fis = new FileInputStream(archName);
             instance = new Archive(fis);
-            fos = new FileOutputStream("test\\extracted.jpg");
-            instance.extractFile(fis, "cat.jpg", fos);
-            fos.flush();
+            baos = new ByteArrayOutputStream();
+            instance.extractFile(fis, "cat.jpg", baos);
+           
+            result = baos.toByteArray();
+            
             fis.close();
-            fos.close();
+            baos.close();
+            
+            assertEquals(expResult.length, result.length);
+            
+            for (int i = 0; i < expResult.length; i++)
+            {
+                if (expResult[i] != result[i])
+                {
+                    diffCount++;
+                }
+            }
+            
+            assertEquals(diffCount, 0);
             
             System.out.println("\tSUCCESS");
         }
