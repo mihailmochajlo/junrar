@@ -226,13 +226,22 @@ public class Archive implements Closeable {
                     switch (block.getHeaderType())
                     {
                         case MarkHeader:
+                            markHead = new MarkHeader(block);
+                            if (!markHead.isSignature()) {
+                                throw new RarException(RarException.RarExceptionType.badRarArchive);
+                            }
                             break;
                         case MainHeader:
                             toRead = block.hasEncryptVersion() ? MainHeader.mainHeaderSizeWithEnc
                                             : MainHeader.mainHeaderSize;
-                            rois.skip(toRead);
+                            byte[] mainbuff = new byte[toRead];
+                            rois.readFully(mainbuff, toRead);
+                            MainHeader mainhead = new MainHeader(block, mainbuff);
+                            this.newMhd = mainhead;
+                            if (newMhd.isEncrypted()) {
+                                throw new RarException(RarExceptionType.rarEncryptedException);
+                            }
                             break;
-
                         case SignHeader:
                             toRead = SignHeader.signHeaderSize;
                             rois.skip(toRead);
@@ -385,13 +394,22 @@ public class Archive implements Closeable {
                     switch (block.getHeaderType())
                     {
                         case MarkHeader:
+                            markHead = new MarkHeader(block);
+                            if (!markHead.isSignature()) {
+                                throw new RarException(RarException.RarExceptionType.badRarArchive);
+                            }
                             break;
                         case MainHeader:
                             toRead = block.hasEncryptVersion() ? MainHeader.mainHeaderSizeWithEnc
                                             : MainHeader.mainHeaderSize;
-                            rois.skip(toRead);
+                            byte[] mainbuff = new byte[toRead];
+                            rois.readFully(mainbuff, toRead);
+                            MainHeader mainhead = new MainHeader(block, mainbuff);
+                            this.newMhd = mainhead;
+                            if (newMhd.isEncrypted()) {
+                                throw new RarException(RarExceptionType.rarEncryptedException);
+                            }
                             break;
-
                         case SignHeader:
                             toRead = SignHeader.signHeaderSize;
                             rois.skip(toRead);

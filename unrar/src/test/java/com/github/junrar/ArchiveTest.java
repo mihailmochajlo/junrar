@@ -57,10 +57,12 @@ public class ArchiveTest extends TestCase {
             {
                 assert(expResult.contains(result.get(i)));
             }
+            
+            System.out.println("\tSUCCESS");
         }
         catch(Exception ex)
         {
-            System.out.println(ex.getMessage());
+            System.out.println("\tERROR: " + ex.getMessage());
         }
     }
     
@@ -89,10 +91,12 @@ public class ArchiveTest extends TestCase {
             fos.flush();
             fis.close();
             fos.close();
+            
+            System.out.println("\tSUCCESS");
         }
         catch (Exception ex)
         {
-            System.out.println(ex.getMessage());
+            System.out.println("\tERROR: " + ex.getMessage());
         }
     }
 }
