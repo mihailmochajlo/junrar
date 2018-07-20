@@ -113,15 +113,6 @@ public class Archive implements Closeable {
 		dataIO = new ComprDataIO(this);
 	}
 
-	public Archive(File firstVolume) throws RarException, IOException {
-		this(new FileVolumeManager(firstVolume), null);
-	}
-
-	public Archive(File firstVolume, UnrarCallback unrarCallback)
-			throws RarException, IOException {
-		this(new FileVolumeManager(firstVolume), unrarCallback);
-	}
-
 	public Archive(InputStream firstVolume) throws RarException, IOException {
             rois = new InputStreamReadOnlyAccessFile(firstVolume);
             dataIO = new ComprDataIO(this);
@@ -145,60 +136,6 @@ public class Archive implements Closeable {
 
 	public IReadOnlyAccess getRois() {
 		return rois;
-	}
-
-	/**
-	 * @return returns all file headers of the archive
-	 */
-	public List<FileHeader> getFileHeaders() {
-		List<FileHeader> list = new ArrayList<FileHeader>();
-		for (BaseBlock block : headers) {
-			if (block.getHeaderType().equals(UnrarHeadertype.FileHeader)) {
-				list.add((FileHeader) block);
-			}
-		}
-		return list;
-	}
-        
-        public FileHeader getFileHeaderFromName(String name)
-        {
-            FileHeader result = null;
-            List<FileHeader> file_headers = getFileHeaders();
-            for (int i = 0; i < file_headers.size() && result == null; i = i + 1)
-            {
-                if (file_headers.get(i).getFileNameW().equals(name))
-                {
-                    result = file_headers.get(i);
-                }
-            }
-            return result;
-        }
-
-	public FileHeader nextFileHeader() {
-		int n = headers.size();
-		while (currentHeaderIndex < n) {
-			BaseBlock block = headers.get(currentHeaderIndex++);
-			if (block.getHeaderType() == UnrarHeadertype.FileHeader) {
-				return (FileHeader) block;
-			}
-		}
-		return null;
-	}
-
-	public UnrarCallback getUnrarCallback() {
-		return unrarCallback;
-	}
-
-	/**
-	 * 
-	 * @return whether the archive is encrypted
-	 */
-	public boolean isEncrypted() {
-		if (newMhd != null) {
-			return newMhd.isEncrypted();
-		} else {
-			throw new NullPointerException("mainheader is null");
-		}
 	}
 
         public List<String> readFileHeaders(InputStream is) throws IOException, RarException
@@ -565,16 +502,6 @@ public class Archive implements Closeable {
 			}
 		}
 	}
-        
-        public void extractFile(String file_name, OutputStream os) throws RarException
-        {
-            FileHeader header = getFileHeaderFromName(file_name);
-            if (header == null)
-            {
-                throw new RarException(RarExceptionType.headerNotInArchive);
-            }
-            extractFile(header, os);
-        }
 
 	/**
 	 * Returns an {@link InputStream} that will allow to read the file and
@@ -673,27 +600,5 @@ public class Archive implements Closeable {
 		if (unpack != null) {
 			unpack.cleanUp();
 		}
-	}
-
-	/**
-	 * @return the volumeManager
-	 */
-	public VolumeManager getVolumeManager() {
-		return volumeManager;
-	}
-
-	/**
-	 * @param volumeManager
-	 *            the volumeManager to set
-	 */
-	public void setVolumeManager(VolumeManager volumeManager) {
-		this.volumeManager = volumeManager;
-	}
-
-	/**
-	 * @return the volume
-	 */
-	public Volume getVolume() {
-		return volume;
 	}
 }

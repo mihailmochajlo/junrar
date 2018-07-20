@@ -20,9 +20,7 @@ public final class RandomAccessStream extends InputStream {
 	private static final int BLOCK_SHIFT = 9;
 
 	private InputStream src;
-	private RandomAccessFile ras;
 	private long pointer;
-	private Vector data;
 	private int length;
 	private boolean foundEOS;
 
@@ -32,23 +30,17 @@ public final class RandomAccessStream extends InputStream {
 	 */
 	public RandomAccessStream(InputStream inputstream) {
 		pointer = 0L;
-		data = new Vector();
 		length = 0;
 		foundEOS = false;
 		src = inputstream;
 	}
 
-	/** Constructs a RandomAccessStream from an RandomAccessFile. */
-	public RandomAccessStream(RandomAccessFile ras) {
-		this.ras = ras;
-	}
-
-	public int getFilePointer() throws IOException {
-		if (ras != null)
-			return (int) ras.getFilePointer();
-		else
-			return (int) pointer;
-	}
+//	public int getFilePointer() throws IOException {
+//		if (ras != null)
+//			return (int) ras.getFilePointer();
+//		else
+//			return (int) pointer;
+//	}
 
 	public long getLongFilePointer() throws IOException {
 		if (ras != null)
