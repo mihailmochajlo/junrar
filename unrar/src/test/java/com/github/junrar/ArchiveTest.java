@@ -21,8 +21,9 @@ import junit.framework.TestCase;
  */
 public class ArchiveTest extends TestCase {
 
-    private static final String archName = "test\\test.rar";
-    private static final String fileName = "test\\cat.jpg";
+    private static final String testFolderName = "test";
+    private static final String archName = "test.rar";
+    private static final String fileName = "cat.jpg";
     
     public ArchiveTest(String testName) {
         super(testName);
@@ -46,7 +47,7 @@ public class ArchiveTest extends TestCase {
         
         try
         {
-            archiveFile = new File(archName);
+            archiveFile = new File(testFolderName + "\\" + archName);
             fis = new FileInputStream(archiveFile);
             instance = new Archive(fis);
             List<String> result = instance.readFileHeaders(fis);
@@ -71,7 +72,6 @@ public class ArchiveTest extends TestCase {
     {
         System.out.println("<--- TEST ---> extractFile <--- TEST--->");
         
-        File archiveFile = null;
         FileInputStream fis;
         ByteArrayOutputStream baos;
         Archive instance = null;
@@ -81,16 +81,16 @@ public class ArchiveTest extends TestCase {
         
         try
         {
-            File expFile = new File(fileName);
+            File expFile = new File(testFolderName + "\\" + fileName);
             expResult = new byte[(int)expFile.length()];
-            FileInputStream expFileStream = new FileInputStream(fileName);
+            FileInputStream expFileStream = new FileInputStream(expFile);
             expFileStream.read(expResult);
             expFileStream.close();
             
-            fis = new FileInputStream(archName);
+            fis = new FileInputStream(testFolderName + "\\" + archName);
             instance = new Archive(fis);
             baos = new ByteArrayOutputStream();
-            instance.extractFile(fis, "cat.jpg", baos);
+            instance.extractFile(fis, fileName, baos);
            
             result = baos.toByteArray();
             

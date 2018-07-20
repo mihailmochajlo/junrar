@@ -5,13 +5,6 @@ package com.github.junrar.io;
 
 import java.io.*;
 
-/**
- * This is a class that uses a memory cache to allow seeking within an
- * InputStream. Based on the JAI MemoryCacheSeekableStream class. Can also be
- * constructed from a RandomAccessFile, which uses less memory since the memory
- * cache is not required.
- */
-@SuppressWarnings("rawtypes")
 public final class RandomAccessStream extends InputStream
 {
 	private InputStream src;
@@ -19,10 +12,6 @@ public final class RandomAccessStream extends InputStream
 	private int length;
 	private boolean foundEOS;
 
-	/**
-	 * Constructs a RandomAccessStream from an InputStream. Seeking backwards is
-	 * supported using a memory cache.
-	 */
 	public RandomAccessStream(InputStream inputstream) {
             pointer = 0L;
             length = 0;
@@ -67,9 +56,9 @@ public final class RandomAccessStream extends InputStream
 	public void seek(long loc) throws IOException
         {
             if (loc < 0L)
-                    pointer = 0L;
+                pointer = 0L;
             else
-            {
+            {   
                 long div = loc - pointer;
                 long skipped = 0;
 
@@ -79,7 +68,7 @@ public final class RandomAccessStream extends InputStream
                     div = div - skipped;
                 }
                 pointer = loc;
-            }      
+            }
 	}
         
         public void guaranteedSkip(long num) throws IOException {
@@ -93,9 +82,4 @@ public final class RandomAccessStream extends InputStream
             }
             pointer += num;
         }
-
-//	public void close() throws IOException
-//        {
-//            src.close();
-//	}
 }
