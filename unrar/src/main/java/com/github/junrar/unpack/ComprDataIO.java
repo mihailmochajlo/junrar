@@ -136,7 +136,6 @@ public class ComprDataIO {
 			offset += retCode;
 			count -= retCode;
 			unpPackedSize -= retCode;
-			archive.bytesReadRead(retCode);
 			if (unpPackedSize == 0 && subHead.isSplitAfter()) {
 //				Volume nextVolume = archive.getVolumeManager().nextArchive(
 //						archive, archive.getVolume());

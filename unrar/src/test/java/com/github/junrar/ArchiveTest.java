@@ -5,9 +5,7 @@
  */
 package com.github.junrar;
 
-import com.github.junrar.rarfile.FileHeader;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.List;
@@ -49,7 +47,7 @@ public class ArchiveTest extends TestCase {
         {
             archiveFile = new File(testFolderName + "\\" + archName);
             fis = new FileInputStream(archiveFile);
-            instance = new Archive(fis);
+            instance = new Archive();
             List<String> result = instance.readFileHeaders(fis);
             fis.close();
             
@@ -88,7 +86,7 @@ public class ArchiveTest extends TestCase {
             expFileStream.close();
             
             fis = new FileInputStream(testFolderName + "\\" + archName);
-            instance = new Archive(fis);
+            instance = new Archive();
             baos = new ByteArrayOutputStream();
             instance.extractFile(fis, fileName, baos);
            

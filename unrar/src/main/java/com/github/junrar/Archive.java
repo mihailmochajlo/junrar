@@ -19,21 +19,15 @@
 package com.github.junrar;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.github.junrar.exception.RarException;
 import com.github.junrar.exception.RarException.RarExceptionType;
-import com.github.junrar.impl.FileVolumeManager;
-import com.github.junrar.impl.InputStreamVolumeManager;
 import com.github.junrar.io.IReadOnlyAccess;
 import com.github.junrar.rarfile.AVHeader;
 import com.github.junrar.rarfile.BaseBlock;
@@ -48,8 +42,6 @@ import com.github.junrar.rarfile.MarkHeader;
 import com.github.junrar.rarfile.ProtectHeader;
 import com.github.junrar.rarfile.SignHeader;
 import com.github.junrar.rarfile.SubBlockHeader;
-import com.github.junrar.rarfile.UnixOwnersHeader;
-import com.github.junrar.rarfile.UnrarHeadertype;
 import com.github.junrar.unpack.ComprDataIO;
 import com.github.junrar.unpack.Unpack;
 import com.github.junrar.io.InputStreamReadOnlyAccessFile;
@@ -63,16 +55,10 @@ import com.github.junrar.io.InputStreamReadOnlyAccessFile;
  */
 public class Archive implements Closeable {
 	private static Logger logger = Logger.getLogger(Archive.class.getName());
-
-	private IReadOnlyAccess rof;
         
         private InputStreamReadOnlyAccessFile rois;
 
-	private final UnrarCallback unrarCallback = null;
-
 	private final ComprDataIO dataIO;
-
-	private final List<BaseBlock> headers = new ArrayList<BaseBlock>();
 
 	private MarkHeader markHead = null;
 
@@ -80,62 +66,9 @@ public class Archive implements Closeable {
 
 	private Unpack unpack;
 
-	private int currentHeaderIndex;
-
-	/** Size of packed data in current file. */
-	private long totalPackedSize = 0L;
-
-	/** Number of bytes of compressed data read from current file. */
-	private long totalPackedRead = 0L;
-
-	private VolumeManager volumeManager;
-	private Volume volume;
-
-	public Archive(VolumeManager volumeManager) throws RarException,
-			IOException {
-		this(volumeManager, null);
-	}
-
-	/**
-	 * create a new archive object using the given {@link VolumeManager}
-	 * 
-	 * @param volumeManager
-	 *            the the {@link VolumeManager} that will provide volume stream
-	 *            data
-	 * @throws RarException
-	 */
-	public Archive(VolumeManager volumeManager, UnrarCallback unrarCallback)
-			throws RarException, IOException {
-		this.volumeManager = volumeManager;
-		//this.unrarCallback = unrarCallback;
-
-		//setVolume(this.volumeManager.nextArchive(this, null));
-		dataIO = new ComprDataIO(this);
-	}
-
-	public Archive(InputStream firstVolume) throws RarException, IOException {
-            rois = new InputStreamReadOnlyAccessFile(firstVolume);
+	public Archive() throws RarException, IOException
+        {
             dataIO = new ComprDataIO(this);
-		//this(new InputStreamVolumeManager(firstVolume), null);
-	}
-
-	public Archive(InputStream firstVolume, UnrarCallback unrarCallback)
-			throws RarException, IOException {
-		this(new InputStreamVolumeManager(firstVolume), unrarCallback);
-	}
-
-	public void bytesReadRead(int count) {
-		if (count > 0) {
-			totalPackedRead += count;
-			if (unrarCallback != null) {
-				unrarCallback.volumeProgressChanged(totalPackedRead,
-						totalPackedSize);
-			}
-		}
-	}
-
-	public IReadOnlyAccess getRois() {
-		return rois;
 	}
 
         public List<String> readFileHeaders(InputStream is) throws IOException, RarException
@@ -254,7 +187,7 @@ public class Archive implements Closeable {
 
                                     newpos = ph.getPositionInFile() + ph.getHeaderSize()
                                                     + ph.getDataSize();
-                                    rof.setPosition(newpos);
+                                    rois.setPosition(newpos);
                                     break;
                                 }
                                 case SubHeader: 
@@ -426,7 +359,7 @@ public class Archive implements Closeable {
 
                                     newpos = ph.getPositionInFile() + ph.getHeaderSize()
                                                     + ph.getDataSize();
-                                    rof.setPosition(newpos);
+                                    rois.setPosition(newpos);
                                     break;
                                 }
                                 case SubHeader: 
@@ -477,66 +410,6 @@ public class Archive implements Closeable {
             
             return result;
 	}
-        
-	/**
-	 * Extract the file specified by the given header and write it to the
-	 * supplied output stream
-	 * 
-	 * @param header
-	 *            the header to be extracted
-	 * @param os
-	 *            the outputstream
-	 * @throws RarException
-	 */
-	public void extractFile(FileHeader hd, OutputStream os) throws RarException {
-		if (!headers.contains(hd)) {
-			throw new RarException(RarExceptionType.headerNotInArchive);
-		}
-		try {
-			doExtractFile(hd, os);
-		} catch (Exception e) {
-			if (e instanceof RarException) {
-				throw (RarException) e;
-			} else {
-				throw new RarException(e);
-			}
-		}
-	}
-
-	/**
-	 * Returns an {@link InputStream} that will allow to read the file and
-	 * stream it. Please note that this method will create a new Thread and an a
-	 * pair of Pipe streams.
-	 * 
-	 * @param header
-	 *            the header to be extracted
-	 * @throws RarException
-	 * @throws IOException
-	 *             if any IO error occur
-	 */
-	public InputStream getInputStream(final FileHeader hd) throws RarException,
-			IOException {
-		final PipedInputStream in = new PipedInputStream(32 * 1024);
-		final PipedOutputStream out = new PipedOutputStream(in);
-
-		// creates a new thread that will write data to the pipe. Data will be
-		// available in another InputStream, connected to the OutputStream.
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					extractFile(hd, out);
-				} catch (RarException e) {
-				} finally {
-					try {
-						out.close();
-					} catch (IOException e) {
-					}
-				}
-			}
-		}).start();
-
-		return in;
-	}
 
 	private void doExtractFile(FileHeader hd, OutputStream os)
 			throws RarException, IOException {
@@ -577,6 +450,11 @@ public class Archive implements Closeable {
 		}
 	}
 
+        public IReadOnlyAccess getRois()
+        {
+            return rois;
+	}
+        
 	/**
 	 * @return returns the main header of this archive
 	 */
@@ -593,9 +471,9 @@ public class Archive implements Closeable {
 
 	/** Close the underlying compressed file. */
 	public void close() throws IOException {
-		if (rof != null) {
-			rof.close();
-			rof = null;
+		if (rois != null) {
+			rois.close();
+			rois = null;
 		}
 		if (unpack != null) {
 			unpack.cleanUp();
