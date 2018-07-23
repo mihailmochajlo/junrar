@@ -19,13 +19,12 @@ package com.github.junrar.unpack;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.github.junrar.Archive;
 import com.github.junrar.crc.RarCRC;
 import com.github.junrar.exception.RarException;
-import com.github.junrar.io.InputStreamReadOnlyAccessFile;
+import com.github.junrar.io.InputStreamReader;
 import com.github.junrar.rarfile.FileHeader;
 
 
@@ -41,7 +40,7 @@ public class ComprDataIO {
 
 	private long unpPackedSize;
 
-	private InputStreamReadOnlyAccessFile inputStream;
+	private InputStreamReader inputStream;
 
 	private OutputStream outputStream;
 
@@ -61,7 +60,6 @@ public class ComprDataIO {
 	}
 
 	public void init(FileHeader hd) throws IOException {
-		long startPos = hd.getPositionInFile() + hd.getHeaderSize();
 		unpPackedSize = hd.getFullPackSize();
 		inputStream = archive.getRois();
 		subHead = hd;

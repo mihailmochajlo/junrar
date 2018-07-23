@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 import com.github.junrar.exception.RarException;
 import com.github.junrar.exception.RarException.RarExceptionType;
-import com.github.junrar.io.IReadOnlyAccess;
+import com.github.junrar.io.InputStreamReader;
 import com.github.junrar.rarfile.AVHeader;
 import com.github.junrar.rarfile.BaseBlock;
 import com.github.junrar.rarfile.BlockHeader;
@@ -44,7 +44,6 @@ import com.github.junrar.rarfile.SignHeader;
 import com.github.junrar.rarfile.SubBlockHeader;
 import com.github.junrar.unpack.ComprDataIO;
 import com.github.junrar.unpack.Unpack;
-import com.github.junrar.io.InputStreamReadOnlyAccessFile;
 
 
 /**
@@ -53,10 +52,10 @@ import com.github.junrar.io.InputStreamReadOnlyAccessFile;
  * @author $LastChangedBy$
  * @version $LastChangedRevision$
  */
-public class Archive implements Closeable {
+public class Archive{
 	private static Logger logger = Logger.getLogger(Archive.class.getName());
         
-        private InputStreamReadOnlyAccessFile rois;
+        private InputStreamReader rois;
 
 	private final ComprDataIO dataIO;
 
@@ -73,7 +72,7 @@ public class Archive implements Closeable {
 
         public List<String> readFileHeaders(InputStream is) throws IOException, RarException
         {
-            rois = new InputStreamReadOnlyAccessFile(is);
+            rois = new InputStreamReader(is);
             List<String> fileNames = new ArrayList<String>();
             int toRead = 0;
 
@@ -85,7 +84,7 @@ public class Archive implements Closeable {
                     long position = rois.getPosition();
 
                     // logger.info("\n--------reading header--------");
-                    size = rois.readFully(baseBlockBuffer, BaseBlock.BaseBlockSize);
+                    size = rois.read(baseBlockBuffer, 0, BaseBlock.BaseBlockSize);
                     if (size == 0) {
                             break;
                     }
@@ -105,7 +104,7 @@ public class Archive implements Closeable {
                             toRead = block.hasEncryptVersion() ? MainHeader.mainHeaderSizeWithEnc
                                             : MainHeader.mainHeaderSize;
                             byte[] mainbuff = new byte[toRead];
-                            rois.readFully(mainbuff, toRead);
+                            rois.read(mainbuff, 0, toRead);
                             MainHeader mainhead = new MainHeader(block, mainbuff);
                             this.newMhd = mainhead;
                             if (newMhd.isEncrypted()) {
@@ -125,7 +124,7 @@ public class Archive implements Closeable {
                         case CommHeader:
                             toRead = CommentHeader.commentHeaderSize;
                             byte[] commBuff = new byte[toRead];
-                            rois.readFully(commBuff, toRead);
+                            rois.read(commBuff, 0, toRead);
                             CommentHeader commHead = new CommentHeader(block, commBuff);
                             newpos = commHead.getPositionInFile()
                                             + commHead.getHeaderSize();
@@ -146,7 +145,7 @@ public class Archive implements Closeable {
                         default:
                         {
                             byte[] blockHeaderBuffer = new byte[BlockHeader.blockHeaderSize];
-                            rois.readFully(blockHeaderBuffer, BlockHeader.blockHeaderSize);
+                            rois.read(blockHeaderBuffer, 0, BlockHeader.blockHeaderSize);
                             BlockHeader blockHead = new BlockHeader(block,
                                             blockHeaderBuffer);
                             FileHeader fh = null;
@@ -157,7 +156,7 @@ public class Archive implements Closeable {
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
                                     byte[] subHeaderBuffer = new byte[toRead];
-                                    rois.readFully(subHeaderBuffer, toRead);
+                                    rois.read(subHeaderBuffer, 0, toRead);
                                     fh = new FileHeader(blockHead, subHeaderBuffer);
                                     newpos = fh.getPositionInFile() + fh.getHeaderSize()
                                                     + fh.getFullPackSize();
@@ -168,7 +167,7 @@ public class Archive implements Closeable {
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
                                     byte[] fileHeaderBuffer = new byte[toRead];
-                                    rois.readFully(fileHeaderBuffer, toRead);
+                                    rois.read(fileHeaderBuffer, 0, toRead);
                                     fh = new FileHeader(blockHead, fileHeaderBuffer);
                                     fileNames.add(fh.getFileNameW());
                                     newpos = fh.getPositionInFile() + fh.getHeaderSize()
@@ -181,7 +180,7 @@ public class Archive implements Closeable {
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
                                     byte[] protectHeaderBuffer = new byte[toRead];
-                                    rois.readFully(protectHeaderBuffer, toRead);
+                                    rois.read(protectHeaderBuffer, 0, toRead);
                                     ProtectHeader ph = new ProtectHeader(blockHead,
                                                     protectHeaderBuffer);
 
@@ -193,8 +192,8 @@ public class Archive implements Closeable {
                                 case SubHeader: 
                                 {
                                     byte[] subHeadbuffer = new byte[SubBlockHeader.SubBlockHeaderSize];
-                                    rois.readFully(subHeadbuffer,
-                                                    SubBlockHeader.SubBlockHeaderSize);
+                                    rois.read(subHeadbuffer,
+                                                    0, SubBlockHeader.SubBlockHeaderSize);
                                     SubBlockHeader subHead = new SubBlockHeader(blockHead,
                                                     subHeadbuffer);
                                     switch (subHead.getSubType())
@@ -241,7 +240,7 @@ public class Archive implements Closeable {
         
         public boolean extractFile(InputStream is, String fileName, OutputStream os) throws IOException, RarException
         {
-            rois = new InputStreamReadOnlyAccessFile(is);
+            rois = new InputStreamReader(is);
             int toRead = 0;
             boolean result = false;
 
@@ -253,7 +252,7 @@ public class Archive implements Closeable {
                     long position = rois.getPosition();
 
                     // logger.info("\n--------reading header--------");
-                    size = rois.readFully(baseBlockBuffer, BaseBlock.BaseBlockSize);
+                    size = rois.read(baseBlockBuffer, 0, BaseBlock.BaseBlockSize);
                     if (size == 0) {
                             break;
                     }
@@ -273,7 +272,7 @@ public class Archive implements Closeable {
                             toRead = block.hasEncryptVersion() ? MainHeader.mainHeaderSizeWithEnc
                                             : MainHeader.mainHeaderSize;
                             byte[] mainbuff = new byte[toRead];
-                            rois.readFully(mainbuff, toRead);
+                            rois.read(mainbuff, 0, toRead);
                             MainHeader mainhead = new MainHeader(block, mainbuff);
                             this.newMhd = mainhead;
                             if (newMhd.isEncrypted()) {
@@ -293,7 +292,7 @@ public class Archive implements Closeable {
                         case CommHeader:
                             toRead = CommentHeader.commentHeaderSize;
                             byte[] commBuff = new byte[toRead];
-                            rois.readFully(commBuff, toRead);
+                            rois.read(commBuff, 0, toRead);
                             CommentHeader commHead = new CommentHeader(block, commBuff);
                             newpos = commHead.getPositionInFile()
                                             + commHead.getHeaderSize();
@@ -314,7 +313,7 @@ public class Archive implements Closeable {
                         default:
                         {
                             byte[] blockHeaderBuffer = new byte[BlockHeader.blockHeaderSize];
-                            rois.readFully(blockHeaderBuffer, BlockHeader.blockHeaderSize);
+                            rois.read(blockHeaderBuffer, 0, BlockHeader.blockHeaderSize);
                             BlockHeader blockHead = new BlockHeader(block,
                                             blockHeaderBuffer);
                             FileHeader fh = null;
@@ -325,7 +324,7 @@ public class Archive implements Closeable {
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
                                     byte[] subHeaderBuffer = new byte[toRead];
-                                    rois.readFully(subHeaderBuffer, toRead);
+                                    rois.read(subHeaderBuffer, 0, toRead);
                                     fh = new FileHeader(blockHead, subHeaderBuffer);
                                     newpos = fh.getPositionInFile() + fh.getHeaderSize()
                                                     + fh.getFullPackSize();
@@ -336,7 +335,7 @@ public class Archive implements Closeable {
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
                                     byte[] fileHeaderBuffer = new byte[toRead];
-                                    rois.readFully(fileHeaderBuffer, toRead);
+                                    rois.read(fileHeaderBuffer, 0, toRead);
                                     fh = new FileHeader(blockHead, fileHeaderBuffer);
                                     if (fileName.compareTo(fh.getFileNameW()) == 0)
                                     {
@@ -353,7 +352,7 @@ public class Archive implements Closeable {
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
                                     byte[] protectHeaderBuffer = new byte[toRead];
-                                    rois.readFully(protectHeaderBuffer, toRead);
+                                    rois.read(protectHeaderBuffer, 0, toRead);
                                     ProtectHeader ph = new ProtectHeader(blockHead,
                                                     protectHeaderBuffer);
 
@@ -365,8 +364,8 @@ public class Archive implements Closeable {
                                 case SubHeader: 
                                 {
                                     byte[] subHeadbuffer = new byte[SubBlockHeader.SubBlockHeaderSize];
-                                    rois.readFully(subHeadbuffer,
-                                                    SubBlockHeader.SubBlockHeaderSize);
+                                    rois.read(subHeadbuffer,
+                                                    0, SubBlockHeader.SubBlockHeaderSize);
                                     SubBlockHeader subHead = new SubBlockHeader(blockHead,
                                                     subHeadbuffer);
                                     switch (subHead.getSubType())
@@ -443,7 +442,7 @@ public class Archive implements Closeable {
 		}
 	}
 
-        public InputStreamReadOnlyAccessFile getRois()
+        public InputStreamReader getRois()
         {
             return rois;
 	}
@@ -460,16 +459,5 @@ public class Archive implements Closeable {
 	 */
 	public boolean isOldFormat() {
 		return markHead.isOldFormat();
-	}
-
-	/** Close the underlying compressed file. */
-	public void close() throws IOException {
-		if (rois != null) {
-			rois.close();
-			rois = null;
-		}
-		if (unpack != null) {
-			unpack.cleanUp();
-		}
 	}
 }
