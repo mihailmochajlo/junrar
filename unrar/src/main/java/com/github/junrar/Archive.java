@@ -427,18 +427,11 @@ public class Archive implements Closeable {
 			unpack.doUnpack(hd.getUnpVersion(), hd.isSolid());
 			// Verify file CRC
 			hd = dataIO.getSubHeader();
-			long actualCRC = hd.isSplitAfter() ? ~dataIO.getPackedCRC()
-					: ~dataIO.getUnpFileCRC();
+			long actualCRC = ~dataIO.getUnpFileCRC();
 			int expectedCRC = hd.getFileCRC();
 			if (actualCRC != expectedCRC) {
 				throw new RarException(RarExceptionType.crcError);
 			}
-			// if (!hd.isSplitAfter()) {
-			// // Verify file CRC
-			// if(~dataIO.getUnpFileCRC() != hd.getFileCRC()){
-			// throw new RarException(RarExceptionType.crcError);
-			// }
-			// }
 		} catch (Exception e) {
 			unpack.cleanUp();
 			if (e instanceof RarException) {
@@ -450,7 +443,7 @@ public class Archive implements Closeable {
 		}
 	}
 
-        public IReadOnlyAccess getRois()
+        public InputStreamReadOnlyAccessFile getRois()
         {
             return rois;
 	}
