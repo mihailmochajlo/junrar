@@ -21,7 +21,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.github.junrar.Archive;
 import com.github.junrar.crc.RarCRC;
 import com.github.junrar.exception.RarException;
 import com.github.junrar.io.InputStreamReader;
@@ -36,33 +35,26 @@ import com.github.junrar.rarfile.FileHeader;
  */
 public class ComprDataIO {
 
-	private final Archive archive;
+	private final InputStreamReader inputStreamReader;
 
-	private long unpPackedSize;
+	private final OutputStream outputStream;
 
-	private InputStreamReader inputStream;
-
-	private OutputStream outputStream;
-
-	private FileHeader subHead;
+	private final FileHeader subHead;
+        
+        private final boolean isOldFormat;
+        
+        private long unpPackedSize;
 
 	private long unpFileCRC;
 
-	public ComprDataIO(Archive arc) {
-		this.archive = arc;
-	}
-
-	public void init(OutputStream outputStream) {
-		this.outputStream = outputStream;
-		unpPackedSize = 0;
-		unpFileCRC = 0xffffffff;
-		subHead = null;
-	}
-
-	public void init(FileHeader hd) throws IOException {
-		unpPackedSize = hd.getFullPackSize();
-		inputStream = archive.getRois();
-		subHead = hd;
+	public ComprDataIO(FileHeader hd, InputStreamReader isr, OutputStream os, boolean iof)
+        {
+            inputStreamReader = isr;
+            outputStream = os;
+            subHead = hd;
+            isOldFormat = iof;
+            unpPackedSize = hd.getFullPackSize();
+            unpFileCRC = 0xffffffff;
 	}
 
 	public int unpRead(byte[] addr, int offset, int count) throws IOException,
@@ -71,7 +63,7 @@ public class ComprDataIO {
 		while (count > 0) {
 			int readSize = (count > unpPackedSize) ? (int) unpPackedSize
 					: count;
-			retCode = inputStream.read(addr, offset, readSize);
+			retCode = inputStreamReader.read(addr, offset, readSize);
 			if (retCode < 0) {
 				throw new EOFException();
 			}
@@ -95,7 +87,7 @@ public class ComprDataIO {
 
 	public void unpWrite(byte[] addr, int offset, int count) throws IOException {
             outputStream.write(addr, offset, count);
-            if (archive.isOldFormat()) {
+            if (isOldFormat) {
                     unpFileCRC = RarCRC
                                     .checkOldCrc((short) unpFileCRC, addr, count);
             } else {

@@ -18,7 +18,6 @@
  */
 package com.github.junrar;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -57,8 +56,6 @@ public class Archive{
         
         private InputStreamReader rois;
 
-	private final ComprDataIO dataIO;
-
 	private MarkHeader markHead = null;
 
 	private MainHeader newMhd = null;
@@ -67,7 +64,7 @@ public class Archive{
 
 	public Archive() throws RarException, IOException
         {
-            dataIO = new ComprDataIO(this);
+            //dataIO = new ComprDataIO(this);
 	}
 
         public List<String> readFileHeaders(InputStream is) throws IOException, RarException
@@ -412,8 +409,7 @@ public class Archive{
 
 	private void doExtractFile(FileHeader hd, OutputStream os)
 			throws RarException, IOException {
-		dataIO.init(os);
-		dataIO.init(hd);
+		ComprDataIO dataIO = new ComprDataIO(hd, rois, os, markHead.isOldFormat());
 		dataIO.setUnpFileCRC(this.isOldFormat() ? 0 : 0xffFFffFF);
 		if (unpack == null) {
 			unpack = new Unpack(dataIO);
