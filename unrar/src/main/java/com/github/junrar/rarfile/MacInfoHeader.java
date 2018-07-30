@@ -18,8 +18,7 @@
  */
 package com.github.junrar.rarfile;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Logger;
 
 import com.github.junrar.io.Raw;
 
@@ -31,7 +30,7 @@ import com.github.junrar.io.Raw;
 public class MacInfoHeader 
 extends SubBlockHeader 
 {
-	private Log logger = LogFactory.getLog(getClass());
+	private Logger logger = Logger.getLogger(MacInfoHeader.class.getName());
 	
 	public static final short MacInfoHeaderSize = 8;
 	

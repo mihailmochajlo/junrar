@@ -20,9 +20,7 @@ package com.github.junrar.rarfile;
 
 import java.util.Calendar;
 import java.util.Date;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Logger;
 
 import com.github.junrar.io.Raw;
 
@@ -35,7 +33,7 @@ import com.github.junrar.io.Raw;
  */
 public class FileHeader extends BlockHeader {
 
-    private final Log logger = LogFactory.getLog(FileHeader.class.getName());
+    private final Logger logger = Logger.getLogger(FileHeader.class.getName());
 
     private static final byte SALT_SIZE = 8;
 

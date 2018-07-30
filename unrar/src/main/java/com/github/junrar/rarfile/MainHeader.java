@@ -18,8 +18,7 @@
  */
 package com.github.junrar.rarfile;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Logger;
 
 import com.github.junrar.io.Raw;
 
@@ -31,7 +30,7 @@ import com.github.junrar.io.Raw;
  * @version $LastChangedRevision$
  */
 public class MainHeader extends BaseBlock {
-	private Log logger = LogFactory.getLog(MainHeader.class.getName());
+	private Logger logger = Logger.getLogger(MainHeader.class.getName());
 	public static final short mainHeaderSizeWithEnc = 7;
 	public static final short mainHeaderSize = 6;
 	private short highPosAv;

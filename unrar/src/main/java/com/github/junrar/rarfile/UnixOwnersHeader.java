@@ -1,7 +1,6 @@
 package com.github.junrar.rarfile;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Logger;
 
 import com.github.junrar.io.Raw;
 
@@ -9,7 +8,7 @@ import com.github.junrar.io.Raw;
 public class UnixOwnersHeader 
 extends SubBlockHeader 
 {
-	private Log logger = LogFactory.getLog(UnixOwnersHeader.class);
+	private Logger logger = Logger.getLogger(UnixOwnersHeader.class.getName());
 	private int ownerNameSize;
 	private int groupNameSize;
 	private String owner;

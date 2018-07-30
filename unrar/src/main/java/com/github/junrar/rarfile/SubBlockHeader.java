@@ -18,8 +18,7 @@
  */
 package com.github.junrar.rarfile;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Logger;
 
 import com.github.junrar.io.Raw;
 
@@ -27,7 +26,7 @@ import com.github.junrar.io.Raw;
 public class SubBlockHeader 
 extends BlockHeader 
 {
-	private Log logger = LogFactory.getLog(getClass());
+	private Logger logger = Logger.getLogger(SubBlockHeader.class.getName());
 	
 	public static final short SubBlockHeaderSize = 3;
 	
