@@ -43,6 +43,7 @@ import com.github.junrar.rarfile.SignHeader;
 import com.github.junrar.rarfile.SubBlockHeader;
 import com.github.junrar.unpack.ComprDataIO;
 import com.github.junrar.unpack.Unpack;
+import java.util.logging.Level;
 
 
 /**
@@ -62,11 +63,6 @@ public class Archive{
 
 	private Unpack unpack;
 
-	public Archive() throws RarException, IOException
-        {
-            //dataIO = new ComprDataIO(this);
-	}
-
         public List<String> readFileHeaders(InputStream is) throws IOException, RarException
         {
             rois = new InputStreamReader(is);
@@ -80,7 +76,7 @@ public class Archive{
 
                     long position = rois.getPosition();
 
-                    // logger.info("\n--------reading header--------");
+                    logger.log(Level.INFO, "<---reading header--->");
                     size = rois.read(baseBlockBuffer, 0, BaseBlock.BaseBlockSize);
                     if (size == 0) {
                             break;
@@ -92,12 +88,14 @@ public class Archive{
                     switch (block.getHeaderType())
                     {
                         case MarkHeader:
+                            logger.log(Level.INFO, "<---MARK HEADER detected--->");
                             markHead = new MarkHeader(block);
                             if (!markHead.isSignature()) {
                                 throw new RarException(RarException.RarExceptionType.badRarArchive);
                             }
                             break;
                         case MainHeader:
+                            logger.log(Level.INFO, "<---MAIN HEADER detected--->");
                             toRead = block.hasEncryptVersion() ? MainHeader.mainHeaderSizeWithEnc
                                             : MainHeader.mainHeaderSize;
                             byte[] mainbuff = new byte[toRead];
@@ -109,16 +107,19 @@ public class Archive{
                             }
                             break;
                         case SignHeader:
+                            logger.log(Level.INFO, "<---SIGN HEADER detected--->");
                             toRead = SignHeader.signHeaderSize;
                             rois.skip(toRead);
                             break;
 
                         case AvHeader:
+                            logger.log(Level.INFO, "<---AV HEADER detected--->");
                             toRead = AVHeader.avHeaderSize;
                             rois.skip(toRead);
                             break;
 
                         case CommHeader:
+                            logger.log(Level.INFO, "<---COMM HEADER detected--->");
                             toRead = CommentHeader.commentHeaderSize;
                             byte[] commBuff = new byte[toRead];
                             rois.read(commBuff, 0, toRead);
@@ -128,6 +129,7 @@ public class Archive{
                             rois.setPosition(newpos);
                             break;
                         case EndArcHeader:
+                            logger.log(Level.INFO, "<---END ARCH HEADER detected--->");
                             toRead = 0;
                             if (block.hasArchiveDataCRC()) {
                                     toRead += EndArcHeader.endArcArchiveDataCrcSize;
@@ -149,6 +151,7 @@ public class Archive{
                             switch (blockHead.getHeaderType())
                             {
                                 case NewSubHeader:
+                                    logger.log(Level.INFO, "<---NEW SUB HEADER detected--->");
                                     toRead = blockHead.getHeaderSize()
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
@@ -160,6 +163,7 @@ public class Archive{
                                     rois.setPosition(newpos);
                                     break;
                                 case FileHeader:
+                                    logger.log(Level.INFO, "<---FILE HEADER detected--->");
                                     toRead = blockHead.getHeaderSize()
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
@@ -173,6 +177,7 @@ public class Archive{
                                     break;
                                 case ProtectHeader:
                                 {
+                                    logger.log(Level.INFO, "<---PROTECT HEADER detected--->");
                                     toRead = blockHead.getHeaderSize()
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
@@ -188,6 +193,7 @@ public class Archive{
                                 }
                                 case SubHeader: 
                                 {
+                                    logger.log(Level.INFO, "<---SUB HEADER detected--->");
                                     byte[] subHeadbuffer = new byte[SubBlockHeader.SubBlockHeaderSize];
                                     rois.read(subHeadbuffer,
                                                     0, SubBlockHeader.SubBlockHeaderSize);
@@ -223,15 +229,14 @@ public class Archive{
                                 }
                                 default:
                                 {
-                                    logger.warning("Unknown Header");
+                                    logger.log(Level.WARNING, "<---UNKNOWN HEADER--->");
                                     throw new RarException(RarExceptionType.notRarArchive);
                                 }
                             }
                         }
                     }
-                    // logger.info("\n--------end header--------");
+                    logger.log(Level.INFO, "<--- end reading --->");
             }
-            
             return fileNames;
 	}
         
@@ -248,7 +253,7 @@ public class Archive{
 
                     long position = rois.getPosition();
 
-                    // logger.info("\n--------reading header--------");
+                    logger.log(Level.INFO, "<---reading header--->");
                     size = rois.read(baseBlockBuffer, 0, BaseBlock.BaseBlockSize);
                     if (size == 0) {
                             break;
@@ -260,12 +265,14 @@ public class Archive{
                     switch (block.getHeaderType())
                     {
                         case MarkHeader:
+                            logger.log(Level.INFO, "<---MARK HEADER detected--->");
                             markHead = new MarkHeader(block);
                             if (!markHead.isSignature()) {
                                 throw new RarException(RarException.RarExceptionType.badRarArchive);
                             }
                             break;
                         case MainHeader:
+                            logger.log(Level.INFO, "<---MAIN HEADER detected--->");
                             toRead = block.hasEncryptVersion() ? MainHeader.mainHeaderSizeWithEnc
                                             : MainHeader.mainHeaderSize;
                             byte[] mainbuff = new byte[toRead];
@@ -277,16 +284,19 @@ public class Archive{
                             }
                             break;
                         case SignHeader:
+                            logger.log(Level.INFO, "<---SIGN HEADER detected--->");
                             toRead = SignHeader.signHeaderSize;
                             rois.skip(toRead);
                             break;
 
                         case AvHeader:
+                            logger.log(Level.INFO, "<---AV HEADER detected--->");
                             toRead = AVHeader.avHeaderSize;
                             rois.skip(toRead);
                             break;
 
                         case CommHeader:
+                            logger.log(Level.INFO, "<---COMM HEADER detected--->");
                             toRead = CommentHeader.commentHeaderSize;
                             byte[] commBuff = new byte[toRead];
                             rois.read(commBuff, 0, toRead);
@@ -296,6 +306,7 @@ public class Archive{
                             rois.setPosition(newpos);
                             break;
                         case EndArcHeader:
+                            logger.log(Level.INFO, "<---END ARC HEADER detected--->");
                             toRead = 0;
                             if (block.hasArchiveDataCRC()) {
                                     toRead += EndArcHeader.endArcArchiveDataCrcSize;
@@ -317,6 +328,7 @@ public class Archive{
                             switch (blockHead.getHeaderType())
                             {
                                 case NewSubHeader:
+                                    logger.log(Level.INFO, "<---NEW SUB HEADER detected--->");
                                     toRead = blockHead.getHeaderSize()
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
@@ -328,6 +340,7 @@ public class Archive{
                                     rois.setPosition(newpos);
                                     break;
                                 case FileHeader:
+                                    logger.log(Level.INFO, "<---FILE HEADER detected--->");
                                     toRead = blockHead.getHeaderSize()
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
@@ -345,6 +358,7 @@ public class Archive{
                                     break;
                                 case ProtectHeader:
                                 {
+                                    logger.log(Level.INFO, "<---PROTECT HEADER detected--->");
                                     toRead = blockHead.getHeaderSize()
                                                     - BlockHeader.BaseBlockSize
                                                     - BlockHeader.blockHeaderSize;
@@ -360,6 +374,7 @@ public class Archive{
                                 }
                                 case SubHeader: 
                                 {
+                                    logger.log(Level.INFO, "<---SUB HEADER detected--->");
                                     byte[] subHeadbuffer = new byte[SubBlockHeader.SubBlockHeaderSize];
                                     rois.read(subHeadbuffer,
                                                     0, SubBlockHeader.SubBlockHeaderSize);
@@ -395,13 +410,13 @@ public class Archive{
                                 }
                                 default:
                                 {
-                                    logger.warning("Unknown Header");
+                                    logger.log(Level.WARNING, "<---UNKNOWN HEADER--->");
                                     throw new RarException(RarExceptionType.notRarArchive);
                                 }
                             }
                         }
                     }
-                    // logger.info("\n--------end header--------");
+                    logger.log(Level.INFO, "<--- end reading --->");
             }
             
             return result;
