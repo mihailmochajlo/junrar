@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.github.junrar.exception.RarException;
 import com.github.junrar.exception.RarException.RarExceptionType;
@@ -43,8 +44,6 @@ import com.github.junrar.rarfile.SignHeader;
 import com.github.junrar.rarfile.SubBlockHeader;
 import com.github.junrar.unpack.ComprDataIO;
 import com.github.junrar.unpack.Unpack;
-import java.util.logging.Level;
-
 
 /**
  * The Main Rar Class; represents a rar Archive
@@ -53,7 +52,7 @@ import java.util.logging.Level;
  * @version $LastChangedRevision$
  */
 public class Archive{
-	private static Logger logger = Logger.getLogger(Archive.class.getName());
+	private static final Logger logger = Logger.getLogger(Archive.class.getName());
         
         private InputStreamReader rois;
 
@@ -350,7 +349,7 @@ public class Archive{
                                     if (fileName.compareTo(fh.getFileNameW()) == 0)
                                     {
                                         result = true;
-                                        doExtractFile(fh, os);
+                                        doExtractFile(fh, os, markHead.isOldFormat());
                                     }
                                     newpos = fh.getPositionInFile() + fh.getHeaderSize()
                                                     + fh.getFullPackSize();
@@ -422,10 +421,10 @@ public class Archive{
             return result;
 	}
 
-	private void doExtractFile(FileHeader hd, OutputStream os)
+	private void doExtractFile(FileHeader hd, OutputStream os, boolean isOldFormat)
 			throws RarException, IOException {
-		ComprDataIO dataIO = new ComprDataIO(hd, rois, os, markHead.isOldFormat());
-		dataIO.setUnpFileCRC(this.isOldFormat() ? 0 : 0xffFFffFF);
+		ComprDataIO dataIO = new ComprDataIO(hd, rois, os, isOldFormat);
+		dataIO.setUnpFileCRC(isOldFormat ? 0 : 0xffFFffFF);
 		if (unpack == null) {
 			unpack = new Unpack(dataIO);
 		}
@@ -451,24 +450,5 @@ public class Archive{
 				throw new RarException(e);
 			}
 		}
-	}
-
-        public InputStreamReader getRois()
-        {
-            return rois;
-	}
-        
-	/**
-	 * @return returns the main header of this archive
-	 */
-	public MainHeader getMainHeader() {
-		return newMhd;
-	}
-
-	/**
-	 * @return whether the archive is old format
-	 */
-	public boolean isOldFormat() {
-		return markHead.isOldFormat();
 	}
 }
